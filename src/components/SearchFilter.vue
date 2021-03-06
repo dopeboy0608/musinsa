@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import Events from "@/event/Events";
+
 const initFilter = () => {
   return [
     {
@@ -46,15 +48,16 @@ export default {
   name: "SearchFilter",
   data () {
     return {
-      color: 'white',
       buttons: initFilter(),
-      setId: 0,
+      setId: null,
+      delay: 300,
     }
   },
   methods: {
     setActive(button, index) {
       if (this.setId) {
         clearTimeout(this.setId)
+        this.setId = null
       }
       if(button.isActive) {
         this.buttons[index].color = 'white'
@@ -65,19 +68,37 @@ export default {
         this.buttons[index].textColor = 'white'
         this.buttons[index].isActive = true
       }
+      if (index === 0) {
+        this.isAlive = this.buttons[index].isActive
+      }
+
+      if (index === 1) {
+        this.gender = this.buttons[index].isActive
+      }
+
+      if (index === 2) {
+        this.isTvSeries = this.buttons[index].isActive
+      }
+
       this.setId = setTimeout(() => {
-        this.$emit('FILTER_UPDATE', this.createParams())
-      }, 300)
+        this.$emit(Events.FILTER_UPDATE, this.createFilterOptions())
+      }, this.delay)
     },
     onReset() {
       if (this.setId) {
         clearTimeout(this.setId)
+        this.setId = null
       }
       this.buttons = initFilter()
-      this.$emit('FILTER_UPDATE', this.createParams())
+      this.setId = setTimeout(() => {
+        this.$emit(Events.FILTER_UPDATE, this.createFilterOptions())
+      }, this.delay)
     },
-    createParams() {
+    createFilterOptions() {
       return {
+        isAlive: this.buttons[0].isActive,
+        isFemale: this.buttons[1].isActive,
+        isTvSeries: this.buttons[2].isActive,
       }
     }
   }

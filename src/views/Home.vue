@@ -5,28 +5,35 @@
       @FILTER_UPDATE="onFilterUpdate"
     />
     <ListContainer
-      :listData="listData"
+      :listData="characterList"
     />
   </div>
 </template>
 
 <script>
-const createList = (page) => {
-  const tempArr = []
-  for (let i=1; i<=10; i++) {
-    tempArr.push({
-      name: `${page}_${i}`,
-      aliases: `aliases`,
-      title: `title`,
-      books: [],
-      tvSeries: [],
-    })
-  }
-  return tempArr
-}
-// import axios from 'axios'
+import Events from "@/event/Events";
+
+// const createList = (page) => {
+//   const tempArr = []
+//   for (let i=1; i<=10; i++) {
+//     tempArr.push({
+//       name: `${page}_${i}`,
+//       aliases: `aliases`,
+//       title: `title`,
+//       books: [],
+//       tvSeries: [],
+//       died: '',
+//       gender: '',
+//     })
+//   }
+//   return tempArr
+// }
+
+import axios from 'axios'
 import SearchFilter from '@/components/SearchFilter';
 import ListContainer from '@/components/list/ListContainer';
+import EventBus from "@/event/EventBus";
+
 export default {
   name: 'MainContainer',
   components: {
@@ -37,55 +44,106 @@ export default {
     return {
       startPage: 0,
       page: 0,
-      listData: [],
+      maxPage: 2,
+      originListData: [],
+      isAlive: false,
+      isFemale: false,
+      isTvSeries: false,
+      params: {
+        page: 0,
+        pageSize: 10,
+      }
     }
   },
   mounted() {
     const { page } = this.$route.query
     this.page = page || 1
     this.startPage = this.page
+    EventBus.$on(Events.REMOVE_ITEM, this.onRemoveItem)
     this.onLoadList()
-
-    window.addEventListener('scroll', this.onScroll)
   },
   beforeDestroy() {
-    window.removeEventListener('scroll', this.onScroll);
+    EventBus.$off(Events.REMOVE_ITEM, this.onRemoveItem)
+    window.removeEventListener('scroll', this.onScroll)
+  },
+  computed: {
+    characterList() {
+      let tempList = this.originListData
+      if (this.isAlive) {
+        tempList = tempList.filter(item => !item.died)
+      }
+      if (this.isFemale) {
+        tempList = tempList.filter(item => item.gender === 'Female')
+      }
+      if (this.isTvSeries) {
+        tempList = tempList.filter(item => !item.tvSeries.length)
+      }
+      // console.log(tempList)
+      return tempList
+    }
   },
   methods: {
-    onLoadList() {
-      // const res = await axios.get('/api')
-      // console.log(res)
-      // this.$q.loading.show()
-      this.listData = this.listData.concat(createList(this.page))
-      console.log(this.listData)
+    async onLoadList() {
+      window.removeEventListener('scroll', this.onScroll)
+      this.params = {
+        ...this.params,
+        page: this.page,
+      }
+
+      this.$q.loading.show()
+      const res = await axios.get('/api', { params: this.params })
+      res.data = res.data.map((item, index) => {
+        return {
+          ...item,
+          key: `${this.page}_${index + 1}`
+        }
+      })
+      this.$q.loading.hide()
+      // createList(this.page)
+      this.originListData = this.originListData.concat(res.data)
+      window.addEventListener('scroll', this.onScroll)
     },
     onScroll() {
-      // console.log(document.body.clientHeight, document.body.offsetHeight, document.body.scrollHeight)
-      // console.log(window.scrollY, window.screen.availHeight, window.outerHeight)
       const currentPosition = document.body.clientHeight - (window.scrollY + window.outerHeight)
-      console.log(currentPosition)
 
       if (currentPosition < 150) {
         console.log('next page!!');
-        this.$q.loading.show()
-        window.removeEventListener('scroll', this.onScroll);
-        setTimeout(() => {
-          console.log('page complete, add scroll')
+        if (this.page + 1 <= this.maxPage) {
           this.page++
           this.onLoadList()
-          window.addEventListener('scroll', this.onScroll)
-          this.$q.loading.hide()
-        }, 300)
+        } else {
+          window.removeEventListener('scroll', this.onScroll)
+          this.$q.notify({
+            message: '마지막 페이지 입니다.',
+            color: 'primary'
+          })
+        }
+
+        // this.$q.loading.show()
+        // window.removeEventListener('scroll', this.onScroll);
+        // setTimeout(() => {
+        //   console.log('page complete, add scroll')
+        //   this.page++
+        //   this.onLoadList()
+        //   window.addEventListener('scroll', this.onScroll)
+        //   this.$q.loading.hide()
+        // }, 300)
       }
     },
-    onFilterUpdate() {
-      console.log('onFilterUpdate')
+    onFilterUpdate(filterOptions) {
+      console.log('filterOptions: ', filterOptions)
+      const { isAlive, isFemale, isTvSeries } = filterOptions
+      this.isAlive = isAlive
+      this.isFemale = isFemale
+      this.isTvSeries = isTvSeries
     },
+    onRemoveItem(key) {
+      this.listData = this.listData.filter(item => item.key !== key)
+    }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h3 {
   margin: 40px 0 0;

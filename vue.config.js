@@ -11,7 +11,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'https://www.anapioficeandfire.com/api/characters?page=1&pageSize=10'
+        target: 'https://www.anapioficeandfire.com/api/characters'
       }
     }
   }

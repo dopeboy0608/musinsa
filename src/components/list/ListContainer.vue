@@ -5,15 +5,6 @@
       :key="index"
       :item="item"
     />
-<!--    <ListCell />-->
-<!--    <ListCell />-->
-<!--    <ListCell />-->
-<!--    <ListCell />-->
-<!--    <ListCell />-->
-<!--    <ListCell />-->
-<!--    <ListCell />-->
-<!--    <ListCell />-->
-<!--    <ListCell />-->
   </div>
 </template>
 
