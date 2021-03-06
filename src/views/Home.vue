@@ -62,10 +62,10 @@ export default {
     this.page = parseInt(page) || 1
     this.startPage = this.page
     this.maxPage = this.page + 10
-    // console.log(this.page, this.maxPage)
+
+    this.onLoadList()
 
     EventBus.$on(Events.REMOVE_ITEM, this.onRemoveItem)
-    this.onLoadList()
   },
   beforeDestroy() {
     EventBus.$off(Events.REMOVE_ITEM, this.onRemoveItem)
@@ -88,12 +88,14 @@ export default {
         res.data = res.data.map((item, index) => {
           return {
             ...item,
-            key: `${this.page}_${index + 1}`
+            key: `${this.page}_${index + 1}`,
+            isRemove: false,
           }
         })
         this.originListData = this.originListData.concat(res.data)
         // this.originListData = this.originListData.concat(createList(this.page))
         this.listData = this.filterList()
+
         window.addEventListener('scroll', this.onScroll)
       } catch (e) {
         this.$q.notify({
@@ -107,7 +109,6 @@ export default {
     },
     onScroll() {
       const currentPosition = document.body.clientHeight - (window.scrollY + window.outerHeight)
-
       if (currentPosition < 150) {
         if (this.page + 1 < this.maxPage) {
           this.page++
@@ -120,7 +121,6 @@ export default {
             timeout: 1500,
           })
         }
-
         // this.$q.loading.show()
         // window.removeEventListener('scroll', this.onScroll);
         // setTimeout(() => {
@@ -141,17 +141,33 @@ export default {
         // }, 300)
       }
     },
-    onFilterUpdate(filterOptions) {
+    onFilterUpdate(filterOptions, isReset = false) {
       // console.log('filterOptions: ', filterOptions)
       const { isAlive, isFemale, isTvSeries } = filterOptions
       this.isAlive = isAlive
       this.isFemale = isFemale
       this.isTvSeries = isTvSeries
 
-      this.listData = this.filterList()
+      // console.log(isReset)
+      this.listData = isReset ? this.onResetItem() : this.filterList()
+    },
+    onResetItem() {
+      this.originListData = this.originListData.map(item => {
+        return {
+          ...item,
+          isRemove: false,
+        }
+      })
+      return this.originListData
     },
     onRemoveItem(key) {
-      this.listData = this.listData.filter(item => item.key !== key)
+      this.originListData = this.originListData.map(item => {
+        return {
+          ...item,
+          isRemove: item.isRemove || key === item.key
+        }
+      })
+      this.listData = this.filterList()
     },
     filterList() {
       let tempList = this.originListData
@@ -164,6 +180,7 @@ export default {
       if (this.isTvSeries) {
         tempList = tempList.filter(item => !item.tvSeries.length)
       }
+      tempList = tempList.filter(item => !item.isRemove)
       return tempList
     }
   }

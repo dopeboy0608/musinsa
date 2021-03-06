@@ -1,11 +1,11 @@
-<template>
-  <div class="q-pa-md items-start q-gutter-md">
+<template >
+  <div class="q-pa-md items-start q-gutter-md" >
     <q-card class="">
       <q-card-section class="bg-primary text-white inner-text">
-<!--        <div class="text-subtitle2">key: {{ item.key }}</div>-->
+        <div class="text-subtitle2">key: {{ item.key }}</div>
         <div class="text-subtitle2">name: {{ item.name }}</div>
-<!--        <div class="text-subtitle2">died: {{ item.died }}</div>-->
-<!--        <div class="text-subtitle2">gender: {{ item.gender }}</div>-->
+        <div class="text-subtitle2">died: {{ item.died }}</div>
+        <div class="text-subtitle2">gender: {{ item.gender }}</div>
         <div class="text-subtitle2">aliases: {{ item.aliases.join(',') }}</div>
         <div class="text-subtitle2">title: {{ item.title }}</div>
         <div class="text-subtitle2">books: {{ item.books.length }}</div>
@@ -37,6 +37,7 @@ export default {
           gender: '',
           books: [],
           tvSeries: [],
+          isRemove: false,
         }
       },
     }

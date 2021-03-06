@@ -91,7 +91,7 @@ export default {
       }
       this.buttons = initFilter()
       this.setId = setTimeout(() => {
-        this.$emit(Events.FILTER_UPDATE, this.createFilterOptions())
+        this.$emit(Events.FILTER_UPDATE, this.createFilterOptions(), true)
       }, this.delay)
     },
     createFilterOptions() {
