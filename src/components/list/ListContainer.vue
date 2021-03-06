@@ -1,11 +1,20 @@
 <template>
   <div>
     <ListCell />
+    <ListCell />
+    <ListCell />
+    <ListCell />
+    <ListCell />
+    <ListCell />
+    <ListCell />
+    <ListCell />
+    <ListCell />
+    <ListCell />
   </div>
 </template>
 
 <script>
-import ListCell from "@/components/list/ListCell"
+import ListCell from '@/components/list/ListCell'
 
 export default {
   name: 'ListContainer',

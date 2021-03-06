@@ -1,15 +1,17 @@
 <template>
   <div>
     <h3>MUSINSA 과제</h3>
-    <SearchFilter />
+    <SearchFilter
+      @FILTER_UPDATE="onFilterUpdate"
+    />
     <ListContainer />
   </div>
 </template>
 
 <script>
 // import axios from 'axios'
-import SearchFilter from "@/components/SearchFilter";
-import ListContainer from "@/components/list/ListContainer";
+import SearchFilter from '@/components/SearchFilter';
+import ListContainer from '@/components/list/ListContainer';
 export default {
   name: 'MainContainer',
   components: {
@@ -19,9 +21,23 @@ export default {
   props: {
     msg: String
   },
-  async mounted() {
+  mounted() {
+    const { page } = this.$route.query
+    console.log('page: ', page)
     // const res = await axios.get('/api')
     // console.log(res)
+    window.addEventListener('scroll', this.onScroll)
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.onScroll);
+  },
+  methods: {
+    onScroll() {
+      console.log(window.scrollY)
+    },
+    onFilterUpdate() {
+      console.log('onFilterUpdate')
+    },
   }
 }
 </script>
