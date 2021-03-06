@@ -13,24 +13,24 @@
 <script>
 import Events from "@/event/Events";
 
-const createList = (page) => {
-  const tempArr = []
-  for (let i=1; i<=10; i++) {
-    tempArr.push({
-      key: `${page}_${i}`,
-      name: `${page}_${i}`,
-      aliases: [],
-      title: `title`,
-      books: [],
-      tvSeries: [],
-      died: i % 3 === 0 ? '2021/03/06' : '',
-      gender: i % 2 === 0 ? 'Female' : 'Male',
-    })
-  }
-  return tempArr
-}
+// const createList = (page) => {
+//   const tempArr = []
+//   for (let i=1; i<=10; i++) {
+//     tempArr.push({
+//       key: `${page}_${i}`,
+//       name: `${page}_${i}`,
+//       aliases: [],
+//       title: `title`,
+//       books: [],
+//       tvSeries: [],
+//       died: i % 3 === 0 ? '2021/03/06' : '',
+//       gender: i % 2 === 0 ? 'Female' : 'Male',
+//     })
+//   }
+//   return tempArr
+// }
 
-// import axios from 'axios'
+import axios from 'axios';
 import SearchFilter from '@/components/SearchFilter';
 import ListContainer from '@/components/list/ListContainer';
 import EventBus from "@/event/EventBus";
@@ -74,61 +74,71 @@ export default {
   methods: {
     async onLoadList() {
       window.removeEventListener('scroll', this.onScroll)
+
       this.params = {
         ...this.params,
         page: this.page,
       }
 
-      // this.$q.loading.show()
-      // const res = await axios.get('/api', { params: this.params })
-      // res.data = res.data.map((item, index) => {
-      //   return {
-      //     ...item,
-      //     key: `${this.page}_${index + 1}`
-      //   }
-      // })
-      // this.$q.loading.hide()
-      // this.originListData = this.originListData.concat(res.data)
+      this.$q.loading.show()
 
-      this.originListData = this.originListData.concat(createList(this.page))
-      this.listData = this.filterList()
-      window.addEventListener('scroll', this.onScroll)
+      try {
+        // const res = await axios.get('/api', { params: this.params })
+        const res = await axios.get('https://www.anapioficeandfire.com/api/characters', { params: this.params })
+        res.data = res.data.map((item, index) => {
+          return {
+            ...item,
+            key: `${this.page}_${index + 1}`
+          }
+        })
+        this.originListData = this.originListData.concat(res.data)
+        // this.originListData = this.originListData.concat(createList(this.page))
+        this.listData = this.filterList()
+        window.addEventListener('scroll', this.onScroll)
+      } catch (e) {
+        this.$q.notify({
+          message: 'API 통신에 실패했습니다.',
+          color: 'red',
+          timeout: 1500,
+        })
+      } finally {
+        this.$q.loading.hide()
+      }
     },
     onScroll() {
       const currentPosition = document.body.clientHeight - (window.scrollY + window.outerHeight)
 
       if (currentPosition < 150) {
-        // console.log('next page!!');
-        // if (this.page + 1 < this.maxPage) {
-        //   this.page++
-        //   this.onLoadList()
-        // } else {
-        //   window.removeEventListener('scroll', this.onScroll)
-        //   this.$q.notify({
-        //     message: '마지막 페이지 입니다.',
-        //     color: 'primary',
-        //     timeout: 1500,
-        //   })
-        // }
+        if (this.page + 1 < this.maxPage) {
+          this.page++
+          this.onLoadList()
+        } else {
+          window.removeEventListener('scroll', this.onScroll)
+          this.$q.notify({
+            message: '마지막 페이지 입니다.',
+            color: 'primary',
+            timeout: 1500,
+          })
+        }
 
-        this.$q.loading.show()
-        window.removeEventListener('scroll', this.onScroll);
-        setTimeout(() => {
-          if (this.page + 1 < this.maxPage) {
-            this.page++
-            this.onLoadList()
-            window.addEventListener('scroll', this.onScroll)
-            this.$q.loading.hide()
-          } else {
-            this.$q.loading.hide()
-            window.removeEventListener('scroll', this.onScroll)
-            this.$q.notify({
-              message: '마지막 페이지 입니다.',
-              color: 'primary',
-              timeout: 1500,
-            })
-          }
-        }, 300)
+        // this.$q.loading.show()
+        // window.removeEventListener('scroll', this.onScroll);
+        // setTimeout(() => {
+        //   if (this.page + 1 < this.maxPage) {
+        //     this.page++
+        //     this.onLoadList()
+        //     window.addEventListener('scroll', this.onScroll)
+        //     this.$q.loading.hide()
+        //   } else {
+        //     this.$q.loading.hide()
+        //     window.removeEventListener('scroll', this.onScroll)
+        //     this.$q.notify({
+        //       message: '마지막 페이지 입니다.',
+        //       color: 'primary',
+        //       timeout: 1500,
+        //     })
+        //   }
+        // }, 300)
       }
     },
     onFilterUpdate(filterOptions) {
@@ -141,7 +151,7 @@ export default {
       this.listData = this.filterList()
     },
     onRemoveItem(key) {
-      this.characterList = this.characterList.filter(item => item.key !== key)
+      this.listData = this.listData.filter(item => item.key !== key)
     },
     filterList() {
       let tempList = this.originListData
