@@ -48,10 +48,14 @@ export default {
     return {
       color: 'white',
       buttons: initFilter(),
+      setId: 0,
     }
   },
   methods: {
     setActive(button, index) {
+      if (this.setId) {
+        clearTimeout(this.setId)
+      }
       if(button.isActive) {
         this.buttons[index].color = 'white'
         this.buttons[index].textColor = 'black'
@@ -61,11 +65,20 @@ export default {
         this.buttons[index].textColor = 'white'
         this.buttons[index].isActive = true
       }
-
-      this.$emit('FILTER_UPDATE')
+      this.setId = setTimeout(() => {
+        this.$emit('FILTER_UPDATE', this.createParams())
+      }, 300)
     },
     onReset() {
+      if (this.setId) {
+        clearTimeout(this.setId)
+      }
       this.buttons = initFilter()
+      this.$emit('FILTER_UPDATE', this.createParams())
+    },
+    createParams() {
+      return {
+      }
     }
   }
 }

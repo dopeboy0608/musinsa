@@ -1,15 +1,19 @@
 <template>
   <div>
-    <ListCell />
-    <ListCell />
-    <ListCell />
-    <ListCell />
-    <ListCell />
-    <ListCell />
-    <ListCell />
-    <ListCell />
-    <ListCell />
-    <ListCell />
+    <ListCell
+      v-for="(item, index) of listData"
+      :key="index"
+      :item="item"
+    />
+<!--    <ListCell />-->
+<!--    <ListCell />-->
+<!--    <ListCell />-->
+<!--    <ListCell />-->
+<!--    <ListCell />-->
+<!--    <ListCell />-->
+<!--    <ListCell />-->
+<!--    <ListCell />-->
+<!--    <ListCell />-->
   </div>
 </template>
 
@@ -20,6 +24,12 @@ export default {
   name: 'ListContainer',
   components: {
     ListCell,
+  },
+  props: {
+    listData: {
+      type: Array,
+      default: () => [],
+    }
   },
   data() {
     return {

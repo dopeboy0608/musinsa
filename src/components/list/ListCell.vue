@@ -5,8 +5,8 @@
         <div class="text-subtitle2">name: {{ item.name }}</div>
         <div class="text-subtitle2">aliases: {{ item.aliases }}</div>
         <div class="text-subtitle2">title: {{ item.title }}</div>
-        <div class="text-subtitle2">books: {{ item.books }}</div>
-        <div class="text-subtitle2">tvSeries: {{ item.tvSeries }}</div>
+        <div class="text-subtitle2">books: {{ item.books.length }}</div>
+        <div class="text-subtitle2">tvSeries: {{ item.tvSeries.length }}</div>
       </q-card-section>
       <q-card-actions align="center">
         <q-btn flat>삭제</q-btn>
@@ -26,8 +26,8 @@ export default {
           name: '',
           aliases: '',
           title: '',
-          books: '',
-          tvSeries: '',
+          books: [],
+          tvSeries: [],
         }
       },
     }

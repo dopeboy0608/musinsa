@@ -4,11 +4,26 @@
     <SearchFilter
       @FILTER_UPDATE="onFilterUpdate"
     />
-    <ListContainer />
+    <ListContainer
+      :listData="listData"
+    />
   </div>
 </template>
 
 <script>
+const createList = (page) => {
+  const tempArr = []
+  for (let i=1; i<=10; i++) {
+    tempArr.push({
+      name: `${page}_${i}`,
+      aliases: `aliases`,
+      title: `title`,
+      books: [],
+      tvSeries: [],
+    })
+  }
+  return tempArr
+}
 // import axios from 'axios'
 import SearchFilter from '@/components/SearchFilter';
 import ListContainer from '@/components/list/ListContainer';
@@ -18,22 +33,50 @@ export default {
     ListContainer,
     SearchFilter,
   },
-  props: {
-    msg: String
+  data() {
+    return {
+      startPage: 0,
+      page: 0,
+      listData: [],
+    }
   },
   mounted() {
     const { page } = this.$route.query
-    console.log('page: ', page)
-    // const res = await axios.get('/api')
-    // console.log(res)
+    this.page = page || 1
+    this.startPage = this.page
+    this.onLoadList()
+
     window.addEventListener('scroll', this.onScroll)
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.onScroll);
   },
   methods: {
+    onLoadList() {
+      // const res = await axios.get('/api')
+      // console.log(res)
+      // this.$q.loading.show()
+      this.listData = this.listData.concat(createList(this.page))
+      console.log(this.listData)
+    },
     onScroll() {
-      console.log(window.scrollY)
+      // console.log(document.body.clientHeight, document.body.offsetHeight, document.body.scrollHeight)
+      // console.log(window.scrollY, window.screen.availHeight, window.outerHeight)
+      const currentPosition = document.body.clientHeight - (window.scrollY + window.outerHeight)
+      console.log(currentPosition)
+
+      if (currentPosition < 150) {
+        console.log('next page!!');
+        this.$q.loading.show()
+        window.removeEventListener('scroll', this.onScroll);
+        setTimeout(() => {
+          console.log('page complete, add scroll')
+          this.page++
+          this.onLoadList()
+          window.addEventListener('scroll', this.onScroll)
+          this.$q.loading.hide()
+        }, 300)
+      }
     },
     onFilterUpdate() {
       console.log('onFilterUpdate')
